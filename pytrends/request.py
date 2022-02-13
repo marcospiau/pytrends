@@ -212,16 +212,16 @@ class TrendReq(object):
                 self.related_queries_widget_list.append(widget)
         return
 
-    def interest_over_time(self):
-        """Request data from Google's Interest Over Time section and return a dataframe"""
-
+    def interest_over_time_json(self):
+        """Request data from Google's Interest Over Time section and returns
+            json data.
+        """
         over_time_payload = {
             # convert to string as requests will mangle
             'req': json.dumps(self.interest_over_time_widget['request']),
             'token': self.interest_over_time_widget['token'],
             'tz': self.tz
         }
-
         # make the request and parse the returned json
         req_json = self._get_data(
             url=TrendReq.INTEREST_OVER_TIME_URL,
@@ -229,7 +229,11 @@ class TrendReq(object):
             trim_chars=5,
             params=over_time_payload,
         )
+        return req_json
 
+    def interest_over_time(self):
+        """Request data from Google's Interest Over Time section and return a dataframe"""
+        req_json = self.interest_over_time_json()
         df = pd.DataFrame(req_json['default']['timelineData'])
         if (df.empty):
             return df
@@ -264,6 +268,7 @@ class TrendReq(object):
             final['isPartial'] = False
 
         return final
+
 
     def interest_by_region(self, resolution='COUNTRY', inc_low_vol=False,
                            inc_geo_code=False):
